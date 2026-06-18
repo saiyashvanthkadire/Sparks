@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI First Aid Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --body-bg: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --header-color: #e63946;
+            --form-bg: #f8fafc;
+            --form-border: #cbd5e0;
+            --primary-btn-bg: #1d3557;
+            --secondary-btn-bg: #e63946;
+            --secondary-btn-hover: #d62828;
+            --modal-bg: #fefefe;
+            --modal-content-border: #888;
+            --modal-overlay-bg: rgba(0, 0, 0, 0.6);
+            --footer-text: #64748b;
+            --footer-disclaimer-text: #94a3b8;
+            --footer-border: #e2e8f0;
+            --loading-text: #1d3557;
+            --close-btn-color: #aaa;
+        }
+
+        body.dark-mode {
+            --body-bg: linear-gradient(135deg, #011f24 0%, #0d3c4a 100%);
+            --container-bg: #1a202c;
+            --text-color: #e2e8f0;
+            --header-color: #f56565;
+            --form-bg: #2d3748;
+            --form-border: #4a5568;
+            --primary-btn-bg: #4299e1;
+            --secondary-btn-bg: #f56565;
+            --secondary-btn-hover: #e53e3e;
+            --modal-bg: #2d3748;
+            --modal-content-border: #555;
+            --modal-overlay-bg: rgba(0, 0, 0, 0.8);
+            --footer-text: #a0aec0;
+            --footer-disclaimer-text: #718096;
+            --footer-border: #4a5568;
+            --loading-text: #e2e8f0;
+            --close-btn-color: #999;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--body-bg);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--header-color);
+            margin-bottom: 30px;
+        }
+
+        .upload-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px dashed var(--form-border);
+            border-radius: 8px;
+            background-color: var(--form-bg);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .upload-form:hover {
+            border-color: var(--header-color);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Hide the default file input */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Style the label as a button */
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: var(--primary-btn-bg);
+            color: white;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: var(--secondary-btn-bg);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-btn-hover);
+        }
+
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        #clear-btn {
+            background-color: #6c757d;
+            display: none;
+        }
+
+        #clear-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* Image Preview in Form */
+        #preview-container img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            /* Hidden by default */
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Analysis Result Styling */
+        .result-grid {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+            align-items: flex-start;
+        }
+
+        .image-column {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .image-column img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .text-column {
+            flex: 2;
+            font-size: 1.1em;
+        }
+
+        .text-column h3 {
+            color: var(--primary-btn-bg);
+            border-bottom: 2px solid var(--header-color);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+
+        .text-column h3:not(:first-child) {
+            margin-top: 30px;
+        }
+
+        .text-column ul,
+        .text-column ol {
+            padding-left: 25px;
+            line-height: 1.7;
+        }
+
+        .text-column li {
+            margin-bottom: 10px;
+        }
+
+        .text-column strong {
+            color: var(--header-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: block;
+            /* Displayed when rendered by server */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: var(--modal-overlay-bg);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.4s;
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            margin: 5vh auto;
+            padding: 40px;
+            border: 1px solid var(--modal-content-border);
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            animation: slideIn 0.4s;
+        }
+
+        .close-button {
+            color: var(--close-btn-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 25px;
+            top: 15px;
+            transition: color 0.2s;
+        }
+
+        .close-button:hover {
+            color: var(--header-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #e63946;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: var(--loading-text);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--footer-border);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--footer-text);
+        }
+
+        .disclaimer-text {
+            font-size: 0.75rem;
+            color: var(--footer-disclaimer-text);
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Theme Switch */
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-btn-bg);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid var(--form-border);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .back-btn:hover {
+            border-color: var(--header-color);
+            color: var(--header-color);
+            transform: translateX(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .upload-form {
+                flex-direction: column;
+            }
+
+            .result-grid {
+                flex-direction: column;
+            }
+
+            .image-column {
+                max-width: 100%;
+            }
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #result-modal,
+            #result-modal * {
+                visibility: visible;
+            }
+
+            #result-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                background-color: white !important;
+                z-index: 9999;
+            }
+
+            .modal-content {
+                border: none;
+                box-shadow: none;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .close-button,
+            .theme-switch-wrapper {
+                display: none !important;
+            }
+
+            .text-column,
+            .text-column * {
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="theme-toggle">
+                <input type="checkbox" id="theme-toggle" />
+                <span class="slider"></span>
+            </label>
+        </div>
+        <a href="index.html" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+        <h1>AI Injury Care Assistant</h1>
+        <form class="upload-form" method="post" enctype="multipart/form-data">
+            <div class="form-controls">
+                <label for="file-upload" class="custom-file-upload">
+                    📂 Upload Image
+                </label>
+                <input id="file-upload" type="file" name="image" accept="image/*" required
+                    onchange="previewImage(event)">
+                <button id="analyze-btn" type="submit" disabled>Analyze Injury</button>
+                <button id="clear-btn" type="button" onclick="clearForm()">Clear Image</button>
+            </div>
+
+            <div id="preview-container">
+                <img id="image-preview" src="#" alt="Image Preview">
+            </div>
+        </form>
+
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing Injury...</div>
+        </div>
+
+        {% if result %}
+        <div id="result-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal()">&times;</span>
+                <div class="result-grid">
+                    <div class="image-column">
+                        <img src="data:{{ mime_type }};base64,{{ image_data }}" alt="Analyzed Injury">
+                    </div>
+                    <div class="text-column">
+                        <div id="analysis-content">
+                            {{ result | safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>&copy; 2026 AI Injury Care Assistant. All rights reserved.</p>
+            <p class="disclaimer-text"><strong>Disclaimer:</strong> This AI tool is for informational purposes only and
+                does not constitute professional medical advice, diagnosis, or treatment. Always seek the advice of a
+                physician or other qualified health provider with any questions you may have regarding a medical
+                condition. In case of a medical emergency, call emergency services immediately.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Theme Switcher Logic ---
+        const themeToggle = document.getElementById('theme-toggle');
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.checked = true;
+        }
+
+        themeToggle.addEventListener('change', function () {
+            if (this.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        // --- End Theme Switcher Logic ---
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const button = document.getElementById('analyze-btn');
+            const output = document.getElementById('image-preview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    output.src = reader.result;
+                    output.style.display = 'inline-block';
+                    button.disabled = false;
+                    document.getElementById('clear-btn').style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('file-upload').value = "";
+            const output = document.getElementById('image-preview');
+            output.style.display = 'none';
+            output.src = "#";
+            document.getElementById('analyze-btn').disabled = true;
+            document.getElementById('clear-btn').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('result-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.querySelector('.upload-form').addEventListener('submit', function () {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        });
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+</body>
+
+</html>

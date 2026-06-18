@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Add Todo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --bg-input: #232730;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-placeholder: #64748b;
+
+            --brand-primary: #6366f1;
+            /* Indigo */
+            --brand-accent: #8b5cf6;
+            /* Violet */
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+            --danger: #ef4444;
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-placeholder: #94a3b8;
+        }
+
+        body.light-mode .header-bar,
+        body.light-mode .form-card,
+        body.light-mode .info-pill {
+            border-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .form-control {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: var(--text-primary);
+        }
+
+        body.light-mode .form-control:focus {
+            background-color: #ffffff;
+            border-color: var(--brand-primary);
+        }
+
+        body.light-mode .back-btn {
+            border-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-secondary);
+        }
+
+        body.light-mode .back-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--brand-primary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header --- */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-card);
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            transform: translateX(-3px);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            flex-grow: 1;
+            text-align: center;
+            padding-right: 80px;
+        }
+
+        /* --- Form Card --- */
+        .form-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .required-star {
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: inherit;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            /* Allows user to resize height only */
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .form-control:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background-color: #2a2e38;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        /* Custom Select Icon */
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            cursor: pointer;
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn:focus-visible,
+        .back-btn:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        /* --- Info Footer --- */
+        .info-pill {
+            background-color: var(--bg-card);
+            padding: 12px 20px;
+            border-radius: 50px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeIn 1s ease-out 0.4s backwards;
+        }
+
+        .info-icon {
+            color: var(--brand-primary);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-title {
+                padding-right: 0;
+                text-align: right;
+            }
+
+            .btn-group {
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+        <header class="header-bar">
+            <a href="index.html" class="back-btn" aria-label="Go Back">
+                <i class="fa-solid fa-chevron-left"></i> Back
+            </a>
+            <h1 class="header-title">Add Todo</h1>
+        </header>
+
+        <section class="form-card">
+            <form id="todo-form" onsubmit="event.preventDefault(); saveTodo();">
+
+                <div class="form-group">
+                    <label for="todo-title" class="form-label">
+                        Todo Title <span class="required-star" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text" id="todo-title" class="form-control" placeholder="What needs to be done?"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="todo-desc" class="form-label">Description</label>
+                    <textarea id="todo-desc" class="form-control" rows="4"
+                        placeholder="Add details, subtasks, or notes here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="due-date" class="form-label">
+                        Due Date <span class="required-star" aria-hidden="true">*</span>
+                    </label>
+                    <input type="date" id="due-date" class="form-control" value="2026-02-10" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="priority" class="form-label">Priority</label>
+                    <div style="position: relative;">
+                        <select id="priority" class="form-control">
+                            <option value="" disabled selected>Select priority level</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Todo</button>
+                </div>
+
+            </form>
+        </section>
+
+        <div class="info-pill">
+            <i class="fa-solid fa-circle-info info-icon"></i>
+            <span>Your todo will appear on the calendar for the selected date</span>
+        </div>
+
+    </main>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('id');
+        const selectedDate = params.get('date');
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        document.getElementById('due-date').value = selectedDate || todayStr;
+
+        if (editId) {
+            loadTodo(editId);
+        }
+
+        async function loadTodo(id) {
+            try {
+                const response = await fetch(`/api/items/item/${id}`);
+                if (!response.ok) {
+                    throw new Error('Unable to load todo');
+                }
+
+                const todo = await response.json();
+                document.getElementById('todo-title').value = todo.title || '';
+                document.getElementById('todo-desc').value = todo.content || '';
+                document.getElementById('due-date').value = todo.date || selectedDate || todayStr;
+                document.getElementById('priority').value = '';
+                document.querySelector('.btn-primary').textContent = 'Update Todo';
+                document.querySelector('.header-title').innerHTML = 'Edit <span style="color:white">Todo</span>';
+            } catch (error) {
+                alert('Could not load this todo.');
+            }
+        }
+
+        async function saveTodo() {
+            const title = document.getElementById('todo-title').value;
+            const desc = document.getElementById('todo-desc').value;
+            const date = document.getElementById('due-date').value;
+            const payload = {
+                type: 'todo',
+                title,
+                content: desc,
+                date,
+                days: []
+            };
+
+            const url = editId ? `/api/items/${editId}` : '/api/items';
+            const method = editId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Unable to save todo');
+                }
+
+                window.location.href = `index2.html?date=${date}`;
+            } catch (error) {
+                alert('Could not save the todo. Please try again.');
+            }
+        }
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+</body>
+
+</html>

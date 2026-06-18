@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nutrition Calorie Counter</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        /* Theme Variables */
+        --bg-body: #0f1115;
+        --bg-card: #181b21;
+        --bg-input: #232730;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --text-placeholder: #64748b;
+        
+        /* Calorie Specific Theme (Amber/Orange) */
+        --brand-primary: #f59e0b; 
+        --brand-secondary: #d97706;
+        --brand-glow: rgba(245, 158, 11, 0.4);
+        
+        --border-radius: 16px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Light Mode */
+    body.light-mode {
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-placeholder: #94a3b8;
+    }
+    body.light-mode .header-bar,
+    body.light-mode .form-card { border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    body.light-mode .form-control { background-color: #f1f5f9; border-color: #cbd5e1; color: var(--text-primary); }
+    body.light-mode .form-control:focus { background-color: #ffffff; }
+    body.light-mode .back-btn { border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+    body.light-mode .back-btn:hover { background: rgba(0,0,0,0.05); color: var(--brand-primary); }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* --- Header --- */
+    .header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--bg-card);
+        padding: 16px 24px;
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        font-weight: 500;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--text-primary);
+        transform: translateX(-3px);
+    }
+
+    .header-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex-grow: 1;
+        text-align: center;
+        padding-right: 80px;
+    }
+
+    .highlight-text {
+        color: var(--brand-primary);
+    }
+
+    /* --- Form Card --- */
+    .form-card {
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius);
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .form-group { margin-bottom: 24px; }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    .form-control {
+        width: 100%;
+        background-color: var(--bg-input);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-family: inherit;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 4px var(--brand-glow);
+        background-color: #2a2e38;
+    }
+
+    .form-control::placeholder { color: var(--text-placeholder); }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: inherit;
+        border: none;
+        background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+        color: white;
+        box-shadow: 0 4px 15px var(--brand-glow);
+        margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px var(--brand-glow);
+        filter: brightness(1.1);
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        display: none; /* Hidden by default */
+    }
+
+    /* Animations */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+
+<body>
+
+<main class="container">
+    <header class="header-bar">
+        <a href="food_assist.html" class="back-btn" aria-label="Go Back">
+            <i class="fa-solid fa-chevron-left"></i> Back
+        </a>
+        <h1 class="header-title">Calorie <span class="highlight-text">Counter</span></h1>
+    </header>
+
+    <section class="form-card">
+        <div class="form-group">
+            <label for="food" class="form-label">Food Item</label>
+            <input type="text" id="food" class="form-control" placeholder="e.g. Chicken Biryani, Rice, Milk, Apple">
+        </div>
+
+        <div class="form-group">
+            <label for="grams" class="form-label">Quantity (grams)</label>
+            <input type="number" id="grams" class="form-control" placeholder="Enter weight in grams">
+        </div>
+
+        <button class="btn-submit" onclick="calculateCalories()">
+            <i class="fa-solid fa-calculator"></i> Calculate Calories
+        </button>
+
+        <div id="result"></div>
+    </section>
+</main>
+
+<script>
+    // Check Theme
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+// EXTENDED CALORIE DATABASE (calories per 1 gram)
+const calorieDB = {
+    // Fruits
+    "apple": 0.52, "banana": 0.89, "mango": 0.60, "orange": 0.47,
+    "grapes": 0.69, "pineapple": 0.50, "papaya": 0.43, "watermelon": 0.30,
+    "strawberry": 0.33, "blueberry": 0.57, "pomegranate": 0.83,
+
+    // Vegetables
+    "potato": 0.87, "tomato": 0.18, "onion": 0.40, "carrot": 0.41,
+    "cucumber": 0.16, "spinach": 0.23, "broccoli": 0.34, "beans": 0.31,
+
+    // Grains & Indian foods
+    "rice": 1.30, "brown rice": 1.11, "chapati": 3.10, "bread": 2.65,
+    "idli": 1.60, "dosa": 1.68, "upma": 1.60, "pongal": 1.90,
+    "sambar": 0.65, "rasam": 0.20, "paratha": 3.20,
+
+    // Curries
+    "dal": 1.16, "chole": 1.80, "rajma": 1.35, "paneer": 2.65,
+    "paneer butter masala": 2.80, "kadhi": 0.90,
+
+    // Dairy
+    "milk": 0.42, "curd": 0.98, "butter": 7.17, "cheese": 4.02,
+
+    // Meat & Eggs
+    "egg": 1.55, "boiled egg": 1.55, "omelette": 2.20,
+    "chicken": 2.39, "chicken curry": 1.80, "chicken fry": 2.50,
+    "mutton": 2.50, "mutton curry": 2.20, "fish": 2.06,
+    "fish fry": 2.30,
+
+    // Popular Indian Biryani Items
+    "chicken biryani": 1.90,
+    "mutton biryani": 2.10,
+    "egg biryani": 1.50,
+    "veg biryani": 1.30,
+    "veg pulao": 1.25,
+    "fried rice": 1.63,
+    "schezwan fried rice": 1.80,
+
+    // Snacks
+    "chips": 5.36, "biscuits": 4.50, "burger": 2.95, "pizza": 2.66,
+    "french fries": 3.12, "samosa": 3.08, "vada": 3.20, 
+    "pani puri": 2.87, "bhel puri": 2.30, "pakoda": 3.80,
+
+    // Sweets
+    "chocolate": 5.46, "ice cream": 2.07, "gulab jamun": 3.17,
+    "laddu": 4.80, "kajukatli": 4.50, "rasgulla": 1.86,
+
+    // Nuts
+    "almonds": 5.76, "cashew": 5.53, "walnut": 6.54, "peanuts": 5.67,
+
+    // Drinks
+    "coke": 0.42, "juice": 0.45, "tea": 0.40, "coffee": 0.02,
+    "milkshake": 1.20, "lassi": 0.80
+};
+
+function calculateCalories() {
+    const food = document.getElementById("food").value.toLowerCase();
+    const grams = parseFloat(document.getElementById("grams").value);
+    const resultDiv = document.getElementById("result");
+    resultDiv.style.display = 'block';
+
+    if (!food || !grams) {
+        resultDiv.innerHTML = "<span style='color: var(--text-secondary)'>Please enter all details!</span>";
+        return;
+    }
+
+    if (calorieDB[food]) {
+        let calories = calorieDB[food] * grams;
+        resultDiv.innerHTML = `Total Calories: <span style="color:var(--brand-primary)">${calories.toFixed(2)} kcal</span>`;
+    } else {
+        resultDiv.innerHTML = "<span style='color: var(--text-secondary)'>Food not found! Try a different item.</span>";
+    }
+}
+</script>
+<script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+</html>

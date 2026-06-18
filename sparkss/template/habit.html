@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Add Habit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --bg-input: #232730;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-placeholder: #64748b;
+            
+            --brand-primary: #6366f1; /* Indigo */
+            --brand-success: #10b981; /* Emerald */
+            --brand-accent: #8b5cf6; /* Violet */
+            
+            --danger: #ef4444;
+            --border-radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-placeholder: #94a3b8;
+        }
+        body.light-mode .header-bar,
+        body.light-mode .form-card { border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        body.light-mode .form-control { background-color: #f1f5f9; border-color: #cbd5e1; color: var(--text-primary); }
+        body.light-mode .form-control:focus { background-color: #ffffff; }
+        body.light-mode .back-btn { border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+        body.light-mode .back-btn:hover { background: rgba(0,0,0,0.05); color: var(--brand-primary); }
+        body.light-mode .day-toggle { background: #f1f5f9; color: var(--text-secondary); border-color: rgba(0,0,0,0.1); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header --- */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-card);
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            transform: translateX(-3px);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            flex-grow: 1;
+            text-align: center;
+            padding-right: 80px; 
+        }
+
+        /* --- Form Card --- */
+        .form-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .form-group { margin-bottom: 24px; }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .required-star { color: var(--danger); margin-left: 4px; }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: inherit;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        textarea.form-control { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+        .form-control:focus {
+            border-color: var(--brand-success);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            background-color: #2a2e38;
+        }
+
+        .form-control::placeholder { color: var(--text-placeholder); }
+
+        /* --- Day Selector --- */
+        .days-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .day-toggle {
+            flex: 1;
+            min-width: 50px;
+            padding: 12px 0;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .day-toggle:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .day-toggle.active {
+            background: var(--brand-success);
+            color: white;
+            border-color: var(--brand-success);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .helper-text { font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; }
+
+        /* --- Info Box --- */
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .info-box-icon {
+            background: var(--brand-primary);
+            min-width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .info-content h4 {
+            color: #818cf8;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .info-content p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        /* Highlight specific days in the text */
+        .dynamic-days {
+            color: var(--brand-success);
+            font-weight: 600;
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            flex-grow: 1;
+            max-width: 200px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn:focus-visible, .day-toggle:focus-visible, input:focus-visible, textarea:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .header-title { padding-right: 0; text-align: right; }
+            .btn-group { flex-direction: column-reverse; }
+            .btn { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <header class="header-bar">
+            <a href="index.html" class="back-btn" aria-label="Go Back">
+                <i class="fa-solid fa-chevron-left"></i> Back
+            </a>
+            <h1 class="header-title">Add Habit</h1>
+        </header>
+
+        <section class="form-card">
+            <form id="habit-form" onsubmit="event.preventDefault(); saveHabit();">
+                
+                <div class="form-group">
+                    <label for="habit-name" class="form-label">
+                        Habit Name <span class="required-star" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text" id="habit-name" class="form-control" placeholder="What habit do you want to build? (e.g., Drink 8 glasses of water)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="habit-desc" class="form-label">Description</label>
+                    <textarea id="habit-desc" class="form-control" rows="3" placeholder="Add more details about this habit, why it's important to you, or any specific goals (optional)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="habit-date" class="form-label">
+                        Start Date <span class="required-star" aria-hidden="true">*</span>
+                    </label>
+                    <input type="date" id="habit-date" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Active Days (Optional)</label>
+                    <div class="days-container" role="group" aria-label="Select active days">
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Mon</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Tue</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Wed</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Thu</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Fri</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Sat</button>
+                        <button type="button" class="day-toggle" onclick="toggleDay(this)" aria-pressed="false">Sun</button>
+                    </div>
+                    <p class="helper-text">Select which days this habit should be active</p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="info-content">
+                        <h4>About Habit Scheduling</h4>
+                        <p id="schedule-text">This habit will appear <span class="dynamic-days">every day</span> by default. Completing them builds your streak! 🔥</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-submit">Create Habit</button>
+                </div>
+
+            </form>
+        </section>
+
+    </main>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        function toggleDay(btn) {
+            // 1. Toggle visual state
+            btn.classList.toggle('active');
+            
+            // 2. Update Accessibility
+            const isPressed = btn.classList.contains('active');
+            btn.setAttribute('aria-pressed', isPressed);
+
+            // 3. Update the Info Box Text
+            updateScheduleText();
+        }
+
+        function updateScheduleText() {
+            const scheduleText = document.getElementById('schedule-text');
+            
+            // Get all buttons that have the 'active' class
+            const activeButtons = document.querySelectorAll('.day-toggle.active');
+            
+            // Extract the text (Mon, Tue) from the buttons
+            const selectedDays = Array.from(activeButtons).map(button => button.innerText);
+            
+            // Logic to change text
+            if (selectedDays.length === 0) {
+                // If nothing selected, revert to default
+                scheduleText.innerHTML = `This habit will appear <span class="dynamic-days">every day</span> by default. Completing them builds your streak! 🔥`;
+            } else if (selectedDays.length === 7) {
+                // If all days selected
+                scheduleText.innerHTML = `This habit will appear <span class="dynamic-days">every day</span>. Completing them builds your streak! 🔥`;
+            } else {
+                // Join the selected days with commas
+                const dayString = selectedDays.join(', ');
+                scheduleText.innerHTML = `This habit will appear on <span class="dynamic-days">${dayString}</span>. Completing them builds your streak! 🔥`;
+            }
+        }
+
+        // --- Save / Edit Logic ---
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('id');
+        const selectedDate = params.get('date');
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        document.getElementById('habit-date').value = selectedDate || todayStr;
+
+        if (editId) {
+            loadHabit(editId);
+        }
+
+        async function loadHabit(id) {
+            try {
+                const response = await fetch(`/api/items/item/${id}`);
+                if (!response.ok) {
+                    throw new Error('Unable to load habit');
+                }
+
+                const item = await response.json();
+                document.getElementById('habit-name').value = item.title || '';
+                document.getElementById('habit-desc').value = item.content || '';
+                document.getElementById('habit-date').value = item.date || selectedDate || todayStr;
+
+                if (item.days && item.days.length > 0) {
+                    const buttons = document.querySelectorAll('.day-toggle');
+                    buttons.forEach(btn => {
+                        if (item.days.includes(btn.innerText)) {
+                            btn.classList.add('active');
+                            btn.setAttribute('aria-pressed', 'true');
+                        }
+                    });
+                }
+
+                document.querySelector('.btn-submit').textContent = 'Update Habit';
+                document.querySelector('.header-title').textContent = 'Edit Habit';
+                updateScheduleText();
+            } catch (error) {
+                alert('Could not load this habit.');
+            }
+        }
+
+        async function saveHabit() {
+            const name = document.getElementById('habit-name').value;
+            const desc = document.getElementById('habit-desc').value;
+            const date = document.getElementById('habit-date').value;
+            
+            const activeButtons = document.querySelectorAll('.day-toggle.active');
+            const days = Array.from(activeButtons).map(btn => btn.innerText);
+
+            const payload = {
+                type: 'habit',
+                title: name,
+                content: desc,
+                date,
+                days
+            };
+
+            const url = editId ? `/api/items/${editId}` : '/api/items';
+            const method = editId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Unable to save habit');
+                }
+
+                window.location.href = `index2.html?date=${date}`;
+            } catch (error) {
+                alert('Could not save the habit. Please try again.');
+            }
+        }
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+</html>

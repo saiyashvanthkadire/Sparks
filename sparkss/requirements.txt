@@ -1,0 +1,7 @@
+Flask
+openai
+python-dotenv
+Markdown
+requests
+firebase-admin
+mysql-connector-python

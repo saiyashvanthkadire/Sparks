@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --bg-hover: #232730;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+
+            --brand-primary: #6366f1;
+            /* Indigo */
+            --brand-accent: #8b5cf6;
+            /* Violet */
+            --danger: #ef4444;
+
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-hover: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        body.light-mode .profile-card,
+        body.light-mode .menu-item,
+        body.light-mode .btn-logout {
+            border-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .stat-box {
+            background: #f1f5f9;
+        }
+
+        body.light-mode .edit-avatar-badge {
+            border-color: #f8fafc;
+            background: #e2e8f0;
+        }
+
+        body.light-mode .menu-icon,
+        body.light-mode .back-btn {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-hover);
+            transform: translateX(-3px);
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .edit-btn {
+            color: var(--brand-primary);
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* --- Profile Info Card --- */
+        .profile-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .edit-avatar-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 2px solid var(--bg-body);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* --- Stats Grid --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Menu List --- */
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .menu-item {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-primary);
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        .menu-item:hover {
+            transform: translateX(5px);
+            border-color: rgba(255, 255, 255, 0.1);
+            background: var(--bg-hover);
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        /* Logout Button */
+        .btn-logout {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'" aria-label="Back to Dashboard">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="page-title">Profile</span>
+            <button class="edit-btn">Edit</button>
+        </header>
+
+        <section class="profile-card">
+            <div class="avatar-container">
+                <div class="avatar">S</div>
+                <div class="edit-avatar-badge"><i class="fa-solid fa-camera"></i></div>
+            </div>
+            <h1 class="user-name">Streak User</h1>
+            <p class="user-email">user@streakspark.com</p>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">Day Streak 🔥</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">85%</span>
+                    <span class="stat-label">Completion</span>
+                </div>
+            </div>
+        </section>
+
+        <nav class="menu-list">
+            <a href="#" class="menu-item">
+                <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-regular fa-user"></i></div>
+                    <span>Account Settings</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; color: #555;"></i>
+            </a>
+
+            <a href="#" class="menu-item">
+                <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-regular fa-bell"></i></div>
+                    <span>Notifications</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; color: #555;"></i>
+            </a>
+
+            <a href="#" class="menu-item" onclick="toggleTheme(event)">
+                <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-solid fa-palette"></i></div>
+                    <span>Appearance</span>
+                </div>
+                <span id="theme-label" style="font-size: 0.8rem; color: var(--text-secondary);">Dark Mode</span>
+            </a>
+
+            <a href="#" class="menu-item">
+                <div class="menu-left">
+                    <div class="menu-icon"><i class="fa-regular fa-circle-question"></i></div>
+                    <span>Help & Support</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; color: #555;"></i>
+            </a>
+        </nav>
+
+        <button class="btn-logout" onclick="window.location.href='/logout'">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+        </button>
+
+    </main>
+
+    <script>
+        // Check Theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            const label = document.getElementById('theme-label');
+            if(label) label.textContent = 'Light Mode';
+        }
+
+        function toggleTheme(e) {
+            e.preventDefault();
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            const label = document.getElementById('theme-label');
+            if(label) label.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = localStorage.getItem('streakSpark_userName') || 'Streak User';
+            const userEmail = localStorage.getItem('streakSpark_userEmail') || 'user@streakspark.com';
+
+            // Update Text
+            document.querySelector('.user-name').textContent = userName;
+            document.querySelector('.user-email').textContent = userEmail;
+
+            // Update Avatar (First Char)
+            if (userName) {
+                document.querySelector('.avatar').textContent = userName.charAt(0).toUpperCase();
+            }
+
+            // Calculate Total Completed Days (Ticks) from Calendar Data
+            const progressMap = JSON.parse(localStorage.getItem('streakSpark_dailyProgress')) || {};
+            let completedDaysCount = 0;
+            Object.values(progressMap).forEach(progress => {
+                if (progress === 100) completedDaysCount++;
+            });
+
+            // Update the "Day Streak" stat on the profile card
+            document.querySelector('.stat-box:first-child .stat-number').textContent = completedDaysCount;
+        });
+    </script>
+</body>
+
+</html>

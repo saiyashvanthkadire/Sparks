@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Dark Mode</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables - Midnight Neon */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a6b5;
+
+            --brand-primary: #6366f1;
+            /* Indigo */
+            --brand-accent: #8b5cf6;
+            /* Violet */
+            --success: #10b981;
+            /* Emerald */
+            --gradient-main: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+            --focus-ring: 2px solid #38bdf8;
+            --border-radius: 16px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        body.light-mode .card,
+        body.light-mode .newsletter-box { border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        body.light-mode .btn-outline { color: var(--text-primary); border-color: rgba(0,0,0,0.2); }
+        body.light-mode .site-footer { background-color: #f1f5f9; }
+        body.light-mode .footer-bottom { background-color: #e2e8f0; color: var(--text-secondary); }
+        body.light-mode .newsletter-input { background: rgba(0,0,0,0.05); color: var(--text-primary); border-color: rgba(0,0,0,0.1); }
+        body.light-mode .social-btn { color: var(--text-secondary); border-color: rgba(0,0,0,0.1); }
+        body.light-mode .social-btn:hover { background: rgba(0,0,0,0.05); }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            margin: 40px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        /* --- Header Section --- */
+        .logo-container {
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--brand-primary);
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+            font-size: 1.1rem;
+            animation: fadeIn 1s ease-out 0.2s backwards;
+        }
+
+        .category-tag {
+            color: var(--brand-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: block;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        .badge {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            animation: fadeIn 1s ease-out 0.4s backwards;
+        }
+
+        /* --- Buttons Area --- */
+        .cta-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.5s backwards;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        /* Accessibility Focus State */
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+        }
+
+        .btn-success {
+            background-color: #064e3b;
+            /* Dark Green */
+            color: #34d399;
+            border: 1px solid #059669;
+        }
+
+        .btn-success:hover {
+            background-color: #065f46;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        /* --- Cards Grid --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            padding: 32px 24px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all var(--transition-speed) ease;
+            opacity: 0;
+            /* Hidden initially for animation */
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* Staggered Animation Delays for Cards */
+        .card:nth-child(1) {
+            animation-delay: 0.6s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.9s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .icon-box {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Specific Icon Colors */
+        .icon-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .icon-purple {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--brand-accent);
+        }
+
+        .icon-orange {
+            background: rgba(244, 63, 94, 0.1);
+            color: #f43f5e;
+        }
+
+        .icon-blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .icon-yellow {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* --- Keyframes --- */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Reduced Motion Preference */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* --- Unique Footer --- */
+        .site-footer {
+            margin-top: auto;
+            position: relative;
+            background-color: #0a0a0a;
+            padding-top: 3rem;
+            overflow: hidden;
+        }
+
+        /* Neon Line at top */
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--brand-primary), var(--brand-accent), transparent);
+            box-shadow: 0 0 20px var(--brand-primary);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 3rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 3rem;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            max-width: 300px;
+            text-align: left;
+        }
+
+        .social-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            background: var(--brand-primary);
+            color: #fff;
+            transform: translateY(-3px) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+            border-color: transparent;
+        }
+
+        .footer-col {
+            text-align: left;
+        }
+
+        .footer-col h4 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--brand-accent);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--brand-primary);
+            transform: translateX(5px);
+        }
+
+        .newsletter-box {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: left;
+        }
+
+        .newsletter-input-group {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .newsletter-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+        }
+
+        .newsletter-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            bottom: 5px;
+            width: 35px;
+            background: var(--brand-primary);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .newsletter-btn:hover {
+            background: var(--brand-accent);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            background: #050505;
+        }
+
+        @media (max-width: 900px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-brand,
+            .newsletter-box {
+                grid-column: span 2;
+            }
+
+            .footer-brand p {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-brand,
+            .newsletter-box {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+        <header>
+            <div class="logo-container">
+                <i class="fa-solid fa-bolt logo-icon" aria-hidden="true"></i>
+            </div>
+            <h1>Streak Spark</h1>
+            <p class="description">
+                Your ultimate habit tracking companion. Build streaks, track progress, and achieve your goals with
+                modern design and intuitive features.
+            </p>
+            <span class="category-tag">Habit Tracking App</span>
+            <div class="badge">
+                <i class="fa-solid fa-check-circle"></i> Free to Use
+            </div>
+        </header>
+
+        <nav class="cta-group" aria-label="Main Actions">
+            <a href="login.html"><button class="btn btn-primary">
+                    Get Started <i class="fa-solid fa-arrow-right"></i>
+                </button></a>
+            <a href="learn.html" class="btn btn-outline">
+                Learn More
+            </a>
+            <button class="btn btn-success">
+                <i class="fa-brands fa-android"></i> Download App
+            </button>
+        </nav>
+
+        <section class="features-grid" aria-label="App Features">
+
+            <article class="card">
+                <div class="icon-box icon-green">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3>Track Habits</h3>
+                <p>Monitor your daily habits and build consistent streaks to reach your goals with visual progress
+                    tracking.</p>
+            </article>
+
+            <article class="card">
+                <div class="icon-box icon-purple">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <h3>Manage Tasks</h3>
+                <p>Organize your todos, notes, and reminders in one convenient place with smart scheduling.</p>
+            </article>
+
+            <a href="food_assist.html" class="card" style="text-decoration: none; display: block; color: inherit;">
+                <div class="icon-box icon-yellow">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <h3>Food Assist</h3>
+                <p>Get nutritional insights and healthy food recommendations powered by AI.</p>
+            </a>
+
+            <a href="medical.html" class="card" style="text-decoration: none; display: block; color: inherit;">
+                <div class="icon-box icon-orange">
+                    <i class="fa-solid fa-kit-medical"></i>
+                </div>
+                <h3>Medical Assist</h3>
+                <p>Get instant AI-powered first aid advice and injury analysis to stay safe and healthy.</p>
+            </a>
+
+            <article class="card">
+                <div class="icon-box icon-blue">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3>Daily Journaling</h3>
+                <p>Reflect on your day with mood tracking and encrypted journaling to build self-awareness.</p>
+            </article>
+
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h2><i class="fa-solid fa-bolt" style="color: var(--brand-primary);"></i> Streak Spark</h2>
+                <p>Empowering you to build lasting habits and achieve your dreams through consistency and insight.</p>
+                <div class="social-row">
+                    <a href="#" class="social-btn" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="#" class="social-btn" aria-label="Github"><i class="fa-brands fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Product</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Integrations</a></li>
+                    <li><a href="#">Changelog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">API Docs</a></li>
+                    <li><a href="#">Status</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <div class="newsletter-box">
+                    <h4>Stay Updated</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Get the latest
+                        tips on productivity.</p>
+                    <form class="newsletter-input-group">
+                        <input type="email" class="newsletter-input" placeholder="Email address" required>
+                        <button type="submit" class="newsletter-btn"><i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Streak Spark. Crafted with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> for
+                habit builders.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+
+</html>

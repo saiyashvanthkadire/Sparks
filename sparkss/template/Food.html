@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Food Assist</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --brand-primary: #10b981; /* Emerald Green */
+            --brand-accent: #059669;
+            --border-radius: 16px;
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        body.light-mode .form-card { border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        body.light-mode select { background: #f1f5f9; color: var(--text-primary); border-color: #cbd5e1; }
+        body.light-mode .back-btn { color: var(--text-primary); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 600px; padding-bottom: 40px; }
+
+        .header { display: flex; align-items: center; margin-bottom: 25px; gap: 15px; }
+        .back-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .page-title { font-size: 1.3rem; font-weight: 600; }
+
+        .form-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        select {
+            width: 100%; padding: 14px;
+            background: #232730; color: white;
+            border: 1px solid #334155; border-radius: 12px;
+            font-family: 'Outfit', sans-serif; font-size: 1rem;
+            outline: none; transition: 0.3s;
+        }
+        select:focus { border-color: var(--brand-primary); }
+
+        .btn-ai {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            color: white; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-ai:hover { transform: translateY(-2px); }
+
+        /* AI Loading Animation */
+        .loading { display: none; text-align: center; padding: 30px; color: var(--brand-primary); }
+        .fa-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Results Container */
+        #results-container { display: flex; flex-direction: column; gap: 15px; }
+
+        /* Individual Food Card */
+        .food-card {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            animation: slideUp 0.5s ease backwards;
+        }
+
+        .food-card h3 { color: var(--brand-primary); font-size: 1.2rem; margin-bottom: 8px; }
+        .food-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px; }
+        
+        .btn-save {
+            background: transparent; color: var(--brand-primary);
+            border: 1px solid var(--brand-primary); padding: 8px 15px;
+            border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+            transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-save:hover { background: var(--brand-primary); color: white; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .visibility-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .visibility-modal-content {
+            width: 100%;
+            max-width: 360px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .visibility-modal-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .visibility-modal-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        .visibility-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .visibility-actions button {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .visibility-actions .btn-public {
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        .visibility-actions .btn-public:hover {
+            background: #34d399;
+            color: #062a1f;
+        }
+
+        .visibility-actions .btn-private {
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+
+        .visibility-actions .btn-private:hover {
+            background: #60a5fa;
+            color: #0b223f;
+        }
+
+        .visibility-cancel {
+            margin-top: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <header class="header">
+        <button class="back-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-arrow-left"></i></button>
+        <span class="page-title"><i class="fa-solid fa-leaf" style="color:var(--brand-primary);"></i> AI Food Assist</span>
+    </header>
+
+    <div class="form-card">
+        <div class="input-group">
+            <label>How are you feeling right now?</label>
+            <select id="mood">
+                <option value="stressed">Stressed / Anxious 😟</option>
+                <option value="tired">Tired / Low Energy 🥱</option>
+                <option value="sad">Sad / Need Comfort 😔</option>
+                <option value="happy">Happy / Energetic 😄</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>What is the weather like?</label>
+            <select id="weather">
+                <option value="cold">Cold / Chilly ❄️</option>
+                <option value="hot">Hot / Sunny ☀️</option>
+                <option value="rainy">Rainy / Gloomy 🌧️</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>What is your primary health goal?</label>
+            <select id="goal">
+                <option value="immunity">Improve Immunity</option>
+                <option value="energy">Boost Energy</option>
+                <option value="comfort">Relaxation & Comfort</option>
+                <option value="fitness">Muscle Recovery / Fitness</option>
+            </select>
+        </div>
+
+        <button class="btn-ai" id="generate-btn" onclick="generateFood()"><i class="fa-solid fa-wand-magic-sparkles"></i> Get 6 Recommendations</button>
+    </div>
+
+    <div id="loading" class="loading">
+        <i class="fa-solid fa-spinner fa-2x"></i>
+        <p style="margin-top: 10px;">AI is analyzing your body's needs...</p>
+    </div>
+
+    <div id="results-container"></div>
+
+</main>
+
+<div id="visibility-modal" class="visibility-modal">
+    <div class="visibility-modal-content">
+        <h3>Save Recommendation</h3>
+        <p>Choose who can view this saved recommendation.</p>
+        <div class="visibility-actions">
+            <button class="btn-private" onclick="saveWithVisibility('private')">Private</button>
+            <button class="btn-public" onclick="saveWithVisibility('public')">Public</button>
+        </div>
+        <button class="visibility-cancel" onclick="closeVisibilityModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // Check Theme
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+    // Global variable to hold current recommendations
+    let currentRecommendations = [];
+    let pendingSaveIndex = null;
+    // global placeholder for image data if/when we integrate uploading
+    let lastImageData = "";
+
+    function generateFood() {
+        const mood = document.getElementById('mood').value;
+        const weather = document.getElementById('weather').value;
+        const goal = document.getElementById('goal').value;
+
+        // UI Updates
+        document.getElementById('generate-btn').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results-container').innerHTML = '';
+
+        // Simulate AI Network Delay
+        setTimeout(() => {
+            
+            // --- MOCK AI LOGIC (Generating 6 Options) ---
+            currentRecommendations = buildRecommendations(mood, weather, goal);
+
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('generate-btn').style.display = 'flex';
+            document.getElementById('generate-btn').innerHTML = '<i class="fa-solid fa-rotate-right"></i> Generate New Options';
+            
+            // Render the results
+            const container = document.getElementById('results-container');
+            currentRecommendations.forEach((item, index) => {
+                // Adding a staggered animation delay so they cascade in beautifully
+                const delay = index * 0.1; 
+                
+                const cardHTML = `
+                    <div class="food-card" style="animation-delay: ${delay}s">
+                        <h3>${index + 1}. ${item.title}</h3>
+                        <p>${item.desc}</p>
+                        <button class="btn-save" onclick="openVisibilityModal(${index})">
+                            <i class="fa-solid fa-bookmark"></i> Save to Notes
+                        </button>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+
+        }, 1500);
+    }
+
+    // Logic to build 6 dynamic recommendations based on user input
+    function buildRecommendations(mood, weather, goal) {
+        let results = [];
+
+        // Base options modified by Mood
+        if (mood === "stressed" || mood === "sad") {
+            results.push({ title: "Dark Chocolate & Almonds", desc: "Dark chocolate releases endorphins and contains flavonoids to reduce stress, while almonds provide magnesium to regulate cortisol." });
+            results.push({ title: "Fatty Fish (Salmon or Tuna)", desc: "Rich in Omega-3 fatty acids (EPA and DHA), which are scientifically linked to lowering inflammation and reducing symptoms of depression." });
+        } else {
+            results.push({ title: "Colorful Berry & Spinach Salad", desc: "Berries contain anthocyanins which boost blood flow to the brain, maintaining your positive energy." });
+            results.push({ title: "Avocado Toast on Whole Grain", desc: "Complex carbohydrates stabilize blood sugar, preventing energy crashes while keeping you focused." });
+        }
+
+        // Weather modifiers
+        if (weather === "cold" || weather === "rainy") {
+            results.push({ title: "Warm Oatmeal with Walnuts", desc: "A cozy comfort food that provides slow-release energy. Walnuts add a crunch and essential brain-boosting Omega-3s." });
+            results.push({ title: "Spiced Lentil & Butternut Squash Soup", desc: "Lentils are an excellent source of B-vitamins for mood balance, and the warm broth is perfect for chilly days." });
+            results.push({ title: "Chamomile or Green Tea", desc: "Green tea contains theanine to sharpen mental focus while providing a gentle, warming lift without the jitters." });
+        } else {
+            results.push({ title: "Chilled Watermelon & Mint Smoothie", desc: "Extremely hydrating for hot weather, helping prevent the fatigue and brain fog that comes with dehydration." });
+            results.push({ title: "Grilled Chicken & Citrus Bowl", desc: "A light, refreshing meal. The vitamin C from citrus fruits supports your immune system during hot summer days." });
+            results.push({ title: "Greek Yogurt with Mixed Seeds", desc: "Cooling and packed with probiotics for gut health, which is directly linked to serotonin production in the brain." });
+        }
+
+        // Goal modifiers
+        if (goal === "fitness") {
+            results.push({ title: "Quinoa and Tofu Power Bowl", desc: "A complete plant-based protein source to help repair muscle tissue after a workout, paired with fiber for digestion." });
+        } else if (goal === "immunity") {
+            results.push({ title: "Turmeric & Ginger Broth", desc: "Both roots have powerful anti-inflammatory and antiviral properties to keep your immune system strong." });
+        } else {
+            results.push({ title: "Banana & Peanut Butter Snack", desc: "Bananas are rich in Vitamin B6, which helps your body synthesize the 'happy chemical' serotonin." });
+        }
+
+        // Ensure we return exactly 6 items (slice just in case logic added more)
+        return results.slice(0, 6);
+    }
+
+    function openVisibilityModal(index) {
+        pendingSaveIndex = index;
+        const modal = document.getElementById('visibility-modal');
+        modal.style.display = 'flex';
+    }
+
+    function closeVisibilityModal() {
+        pendingSaveIndex = null;
+        const modal = document.getElementById('visibility-modal');
+        modal.style.display = 'none';
+    }
+
+    // Save specific recommendation to the Notes section with selected visibility
+    function saveWithVisibility(visibility) {
+        if (pendingSaveIndex === null) return;
+
+        const item = currentRecommendations[pendingSaveIndex];
+        if (!item) {
+            closeVisibilityModal();
+            return;
+        }
+
+        const title = "Diet Idea: " + item.title;
+        const content = item.desc;
+        const fullText = `${title}\n${content}`;
+
+        // try posting to server endpoint; backend will handle login check and DB insert
+        const form = document.getElementById('save-form');
+        document.getElementById('save_result').value = fullText;
+        document.getElementById('save_visibility').value = visibility;
+        // image_data may not be available for this simulated card interface
+        document.getElementById('save_image_data').value = lastImageData || '';
+        form.submit();
+
+        closeVisibilityModal();
+        alert(`"${item.title}" saved as ${visibility}.`);
+        // Optional: window.location.href = 'dashboard.html'; 
+    }
+
+    document.getElementById('visibility-modal').addEventListener('click', (event) => {
+        if (event.target.id === 'visibility-modal') {
+            closeVisibilityModal();
+        }
+    });
+</script>
+
+<!-- hidden form used to send save request to server -->
+<form id="save-form" method="POST" action="/save_food" style="display:none;">
+    <input type="hidden" name="image_data" id="save_image_data">
+    <input type="hidden" name="result" id="save_result">
+    <input type="hidden" name="visibility" id="save_visibility">
+</form>
+
+<script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+</body>
+</html>

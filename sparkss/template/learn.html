@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Learn More</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables - Midnight Neon */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a6b5;
+
+            --brand-primary: #6366f1;
+            /* Indigo */
+            --brand-accent: #8b5cf6;
+            /* Violet */
+            --gradient-main: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+            --border-radius: 16px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        body.light-mode nav { background: rgba(255, 255, 255, 0.9); border-bottom-color: rgba(0,0,0,0.1); }
+        body.light-mode .logo { color: #1e293b; }
+        body.light-mode .features-section, body.light-mode .science-card, body.light-mode .feature-image { background: #ffffff; border-color: rgba(0,0,0,0.1); }
+        body.light-mode .science-card { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 17, 21, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-speed);
+        }
+
+        .back-link:hover {
+            color: var(--brand-primary);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .highlight {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        /* --- Features Grid --- */
+        .features-section {
+            padding: 60px 20px;
+            background: var(--bg-card);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 50px;
+        }
+
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 80px;
+        }
+
+        .feature-row.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .feature-text p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .feature-image {
+            flex: 1;
+            background: #232730;
+            border-radius: 20px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-icon {
+            font-size: 5rem;
+            color: rgba(99, 102, 241, 0.2);
+        }
+
+        /* --- Science Section (Cards) --- */
+        .science-section {
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .science-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .science-card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .science-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--brand-primary);
+        }
+
+        .science-card i {
+            font-size: 2.5rem;
+            color: var(--brand-primary);
+            margin-bottom: 20px;
+        }
+
+        /* --- CTA Section --- */
+        .cta-section {
+            background: var(--gradient-main);
+            padding: 80px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .cta-btn {
+            background: white;
+            color: var(--brand-primary);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .feature-row {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .feature-row.reverse {
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Streak Spark
+        </div>
+        <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Master Your Habits,<br><span class="highlight">Master Your Life</span></h1>
+        <p>Streak Spark isn't just a checklist. It's a psychology-backed system designed to help you build consistency,
+            break bad habits, and visualize your personal growth.</p>
+    </header>
+
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Don't Break the Chain</h3>
+                    <p>We use the powerful "Seinfeld Strategy." Every day you complete a habit, your streak grows. The
+                        longer the streak, the harder it is to break, keeping you motivated even on tough days.</p>
+                </div>
+                <div class="feature-image">
+                    <i class="fa-solid fa-link feature-icon"></i>
+                </div>
+            </div>
+
+            <div class="feature-row reverse">
+                <div class="feature-text">
+                    <h3>Data-Driven Insights</h3>
+                    <p>Stop guessing. Our detailed trackers visualize your mood, sleep, and productivity over time. See
+                        exactly what affects your days and make data-backed decisions for your life.</p>
+                </div>
+                <div class="feature-image">
+                    <i class="fa-solid fa-chart-line feature-icon"></i>
+                </div>
+            </div>
+
+            <div class="feature-row">
+                <div class="feature-text">
+                    <h3>Your Second Brain</h3>
+                    <p>Keep your mental space clear. Use our Quick Notes and Reminders to offload tasks instantly.
+                        Whether it's a grocery list or a midnight idea, we keep it safe.</p>
+                </div>
+                <div class="feature-image">
+                    <i class="fa-solid fa-brain feature-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="science-section">
+        <div class="container">
+            <h2 class="section-title">Why It Works</h2>
+            <div class="science-grid">
+                <div class="science-card">
+                    <i class="fa-solid fa-trophy"></i>
+                    <h3>Gamification</h3>
+                    <p>We turn your life into a game. Earn XP, level up, and unlock badges for consistency.</p>
+                </div>
+                <div class="science-card">
+                    <i class="fa-solid fa-bell"></i>
+                    <h3>Cues & Triggers</h3>
+                    <p>Smart notifications act as "triggers" to initiate the habit loop right when you need it.</p>
+                </div>
+                <div class="science-card">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <h3>Identity Change</h3>
+                    <p>Journaling helps you reflect and shift your identity from "I'm trying" to "I am."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Ready to spark a change?</h2>
+        <p style="margin-top: 10px; opacity: 0.9;">Join thousands of others building a better version of themselves.</p>
+        <a href="home.html" class="cta-btn">Start Your Streak</a>
+    </section>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+
+</html>

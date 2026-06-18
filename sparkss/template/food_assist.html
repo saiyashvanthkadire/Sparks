@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Health - Nutrition Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            
+            /* Green for Food Assist, Orange/Red for Calories */
+            --color-food: #10b981; 
+            --color-food-glow: rgba(16, 185, 129, 0.2);
+            --color-cal: #f59e0b;
+            --color-cal-glow: rgba(245, 158, 11, 0.2);
+            
+            --border-radius: 20px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Centers vertically */
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* --- Header & Back Button --- */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            width: 45px; height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover { 
+            background: rgba(255,255,255,0.1); 
+            transform: translateX(-5px); /* Slides left slightly on hover */
+        }
+
+        .page-title { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Cards Container --- */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* --- Individual Cards --- */
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 35px 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Entrance Animation */
+            animation: slideUp 0.6s ease-out backwards;
+        }
+
+        /* Stagger the animations so they load one after the other */
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+
+        /* Hover Effects */
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .feature-card.food-card:hover { box-shadow: 0 15px 30px var(--color-food-glow); }
+        .feature-card.cal-card:hover { box-shadow: 0 15px 30px var(--color-cal-glow); }
+
+        /* --- Card Content --- */
+        .icon-wrapper {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            transition: transform 0.4s ease;
+        }
+
+        .food-card .icon-wrapper { 
+            background: var(--color-food-glow); 
+            color: var(--color-food); 
+        }
+        
+        .cal-card .icon-wrapper { 
+            background: var(--color-cal-glow); 
+            color: var(--color-cal); 
+        }
+
+        /* Make icon bounce on card hover */
+        .feature-card:hover .icon-wrapper { transform: scale(1.1); }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            flex-grow: 1; /* Pushes button to bottom */
+        }
+
+        /* --- Card Buttons --- */
+        .card-btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .food-card .card-btn {
+            background: transparent;
+            color: var(--color-food);
+            border: 2px solid var(--color-food);
+        }
+        .food-card:hover .card-btn {
+            background: var(--color-food);
+            color: white;
+        }
+
+        .cal-card .card-btn {
+            background: transparent;
+            color: var(--color-cal);
+            border: 2px solid var(--color-cal);
+        }
+        .cal-card:hover .card-btn {
+            background: var(--color-cal);
+            color: white;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'" aria-label="Go Back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1 class="page-title">Nutrition Hub</h1>
+        </header>
+
+        <section class="cards-grid">
+            
+            <a href="Food.html" class="feature-card food-card">
+                <div class="icon-wrapper">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h2 class="card-title">AI Food Assist</h2>
+                <p class="card-desc">Get personalized, smart food recommendations based on your current mood, weather, and health goals.</p>
+                <div class="card-btn">Launch AI</div>
+            </a>
+
+            <a href="calorie.html" class="feature-card cal-card">
+                <div class="icon-wrapper">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </div>
+                <h2 class="card-title">Calorie Counter</h2>
+                <p class="card-desc">Log your daily meals, track your macros, and ensure you are hitting your daily energy targets.</p>
+                <div class="card-btn">Track Calories</div>
+            </a>
+
+        </section>
+
+    </main>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+</html>

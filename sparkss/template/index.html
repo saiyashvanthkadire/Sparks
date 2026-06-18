@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - Dynamic Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Theme Variables - Midnight Neon */
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --bg-hover: #232730;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+
+            --brand-primary: #6366f1;
+            /* Indigo */
+            --brand-glow: 0 0 15px rgba(99, 102, 241, 0.4);
+
+            /* Action Button Colors */
+            --color-todo: #3b82f6;
+            --color-habit: #10b981;
+            --color-reminder: #f43f5e;
+            --color-note: #a855f7;
+            --color-tracker: #22c55e;
+            --color-food: #eab308;
+
+            --border-radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-hover: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        body.light-mode .calendar-card,
+        body.light-mode .top-bar,
+        body.light-mode .actions-section,
+        body.light-mode .profile-popup {
+            border-color: rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        body.light-mode .day:not(:empty):hover { background-color: #e2e8f0; }
+        body.light-mode .nav-btn { background: #f1f5f9; color: var(--text-secondary); border-color: rgba(0,0,0,0.1); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* --- Header --- */
+        .top-bar {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--brand-primary);
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #current-month-year {
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: var(--bg-body);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            box-shadow: var(--brand-glow);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--brand-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        /* --- Calendar Grid --- */
+        .calendar-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 10px;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .weekday {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            background-color: var(--bg-body);
+            border-radius: 12px;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .day:empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .day:not(:empty):hover {
+            background-color: var(--bg-hover);
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* ACTIVE / TODAY STATE 
+           This style now applies dynamically to the system date 
+        */
+        .day.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 1px solid var(--brand-primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+        }
+
+        .day.active .day-number {
+            color: #a5b4fc;
+            /* Light Indigo text */
+        }
+
+        /* --- Quick Actions --- */
+        .actions-section {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            opacity: 0.9;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-5px);
+            opacity: 1;
+            filter: brightness(1.2);
+        }
+
+        .action-btn:focus-visible,
+        .nav-btn:focus-visible,
+        .day:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        /* Specific Colors */
+        .btn-todo {
+            background-color: var(--color-todo);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-habit {
+            background-color: var(--color-habit);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-reminder {
+            background-color: var(--color-reminder);
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2);
+        }
+
+        .btn-note {
+            background-color: var(--color-note);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
+        }
+
+        .btn-tracker {
+            background-color: var(--color-tracker);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-food {
+            background-color: var(--color-food);
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.2);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .days-grid {
+                gap: 5px;
+            }
+
+            .day {
+                padding: 5px;
+                border-radius: 8px;
+            }
+
+            .month-nav {
+                gap: 10px;
+            }
+
+            #current-month-year {
+                min-width: auto;
+                font-size: 1rem;
+            }
+
+            .action-btn {
+                font-size: 0.8rem;
+                padding: 12px;
+            }
+        }
+
+        /* --- Profile Popup --- */
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-popup {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background-color: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px;
+            width: 160px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-out;
+        }
+
+        .profile-popup.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .popup-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .popup-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--brand-primary);
+        }
+
+        .popup-item i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="dashboard-container">
+        <header class="top-bar">
+            <div class="brand">
+                <i class="fa-solid fa-bolt"></i> Streak Spark
+            </div>
+
+            <nav class="month-nav" aria-label="Calendar Navigation">
+                <button class="nav-btn" id="prev-month" aria-label="Previous Month">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <span id="current-month-year">February 2026</span>
+                <button class="nav-btn" id="next-month" aria-label="Next Month">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </nav>
+
+            <div class="profile-wrapper">
+                <div class="profile-icon" id="profile-btn" tabindex="0" role="button" aria-label="User Profile">
+                    {% if username %}
+                        {{ username[0]|upper }}
+                    {% else %}
+                        S
+                    {% endif %}
+                </div>
+                <div class="profile-popup" id="profile-popup">
+                    <a href="profile.html" class="popup-item">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+                    <a href="/logout" class="popup-item">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section class="calendar-card">
+            <div class="weekdays" aria-hidden="true">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+            <div class="days-grid" id="calendar-grid">
+            </div>
+        </section>
+
+        <section class="actions-section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="todo.html" class="action-btn btn-todo">
+                    <i class="fa-solid fa-plus"></i> Todo
+                </a>
+                <a href="habit.html" class="action-btn btn-habit">
+                    <i class="fa-solid fa-circle-check"></i> Habit
+                </a>
+                <a href="remainder.html" class="action-btn btn-reminder">
+                    <i class="fa-solid fa-clock"></i> Reminder
+                </a>
+                <a href="view_notes.html" class="action-btn btn-note">
+                    <i class="fa-solid fa-pen-to-square"></i> Note
+                </a>
+                <a href="food_assist.html" class="action-btn btn-food">
+                    <i class="fa-solid fa-utensils"></i> Food Assist
+                </a>
+                <a href="medical.html" class="action-btn btn-tracker">
+                    <i class="fa-solid fa-kit-medical"></i> Medical Assist
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        const monthYearDisplay = document.getElementById('current-month-year');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const prevBtn = document.getElementById('prev-month');
+        const nextBtn = document.getElementById('next-month');
+
+        // Capture the real system date
+        const systemDate = new Date();
+
+        // This variable tracks the month/year currently being viewed by the user
+        let viewDate = new Date();
+
+        function renderCalendar(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            // Update Header Text
+            const monthName = date.toLocaleString('default', { month: 'long' });
+            monthYearDisplay.textContent = `${monthName} ${year}`;
+
+            // Clear Grid
+            calendarGrid.innerHTML = '';
+
+            // Calculate First Day and Days in Month
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Empty cells for previous month
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('day');
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Generate Days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayBtn = document.createElement('button');
+                dayBtn.classList.add('day');
+                dayBtn.setAttribute('aria-label', `${monthName} ${i}, ${year}`);
+
+                let dayContent = `<span class="day-number">${i}</span>`;
+
+                // Read progress map
+                const progressMap = JSON.parse(localStorage.getItem('streakSpark_dailyProgress')) || {};
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                // CHECK: Is this day actually today (System Date)?
+                const isToday = (
+                    i === systemDate.getDate() &&
+                    month === systemDate.getMonth() &&
+                    year === systemDate.getFullYear()
+                );
+
+                if (isToday) {
+                    dayBtn.classList.add('active'); // Add the Blue/Purple Gradient
+                    // Add the Target Icon (Bullseye)
+                    dayContent += `
+                        <i class="fa-solid fa-bullseye" style="position: absolute; top: 8px; right: 8px; color: #f472b6; font-size: 0.8rem;"></i>
+                    `;
+                }
+
+                // CHECK: Is 100% completed?
+                if (progressMap[dateStr] === 100) {
+                    dayContent += `
+                        <i class="fa-solid fa-circle-check" style="position: absolute; bottom: 8px; right: 8px; color: #22c55e; font-size: 0.9rem;"></i>
+                    `;
+                }
+
+                dayBtn.innerHTML = dayContent;
+
+                // Click to navigate to daily view
+                dayBtn.onclick = () => {
+                    window.location.href = `index2.html?date=${dateStr}`;
+                };
+
+                calendarGrid.appendChild(dayBtn);
+            }
+        }
+
+        // Navigation Buttons change the 'viewDate', not the 'systemDate'
+        prevBtn.addEventListener('click', () => {
+            viewDate.setMonth(viewDate.getMonth() - 1);
+            renderCalendar(viewDate);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            viewDate.setMonth(viewDate.getMonth() + 1);
+            renderCalendar(viewDate);
+        });
+
+        // --- User Data and Profile Icon Update ---
+        const username = "{{ username or '' }}";
+        const email = "{{ email or '' }}";
+
+        if (username) {
+            localStorage.setItem('streakSpark_userName', username);
+        }
+        if (email) {
+            localStorage.setItem('streakSpark_userEmail', email);
+        }
+
+        // Initial Render
+        renderCalendar(viewDate);
+
+        // Update Profile Icon from localStorage (covers both initial load and refresh)
+        const savedName = localStorage.getItem('streakSpark_userName');
+        if (savedName) {
+            document.getElementById('profile-btn').textContent = savedName.charAt(0).toUpperCase();
+        }
+
+        // --- Profile Popup Logic ---
+        const profileBtn = document.getElementById('profile-btn');
+        const profilePopup = document.getElementById('profile-popup');
+
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent click from bubbling to document
+            profilePopup.classList.toggle('active');
+        });
+
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!profilePopup.contains(e.target) && e.target !== profileBtn) {
+                profilePopup.classList.remove('active');
+            }
+        });
+
+        // Close popup on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                profilePopup.classList.remove('active');
+            }
+        });
+
+        // Initial Render
+        renderCalendar(viewDate);
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+</body>
+
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Health Reminder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Pink/Red Theme Variables */
+            --bg-body: #121418;
+            --bg-card: #1c1e24;
+            --bg-input: #262932;
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            
+            --brand-accent: #f43f5e; /* The Pink/Red color */
+            --brand-edit: #3b82f6; /* Blue for the Edit action */
+            --brand-glow: rgba(244, 63, 94, 0.35);
+            
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* --- Header / Top Bar --- */
+        .header {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover { 
+            background: rgba(255,255,255,0.1); 
+            transform: translateX(-3px); 
+        }
+
+        .page-title { 
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.25rem; 
+            font-weight: 600; 
+        }
+
+        .page-title::after {
+            content: "";
+            color: var(--brand-accent);
+        }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 35px 30px;
+            animation: slideUp 0.5s ease-out backwards;
+        }
+        
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+
+        .card h3 {
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* --- Form Inputs --- */
+        .input-group { margin-bottom: 25px; }
+        .input-group label {
+            display: block; margin-bottom: 10px;
+            font-weight: 600; font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .input-group:nth-child(2) label::after,
+        .input-group:nth-child(3) label::after,
+        .input-group:nth-child(4) label::after {
+            content: " *";
+            color: var(--brand-accent);
+        }
+
+        input, select {
+            width: 100%; padding: 16px;
+            background: var(--bg-input); color: var(--text-primary);
+            border: 1px solid transparent; border-radius: 10px;
+            font-family: 'Outfit', sans-serif; font-size: 1rem;
+            outline: none; transition: 0.3s;
+            color-scheme: dark; 
+        }
+        
+        input::placeholder { color: var(--text-secondary); }
+        input:focus, select:focus { border-color: var(--brand-accent); }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            width: 100%; padding: 16px; margin-top: 15px;
+            background: var(--brand-accent);
+            color: white; border: none; border-radius: 10px;
+            font-family: 'Outfit', sans-serif; font-size: 1rem;
+            font-weight: 600; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            box-shadow: 0 8px 25px var(--brand-glow);
+            transition: var(--transition);
+        }
+        
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 12px 30px var(--brand-glow); 
+        }
+
+        #stopBtn {
+            width: 100%; padding: 16px; margin-top: 25px;
+            background: rgba(244, 63, 94, 0.1); color: var(--brand-accent);
+            border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 10px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            display: none; justify-content: center; align-items: center; gap: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        #stopBtn:hover { background: var(--brand-accent); color: white; }
+
+        /* --- Generated Reminder List --- */
+        #reminderList { display: flex; flex-direction: column; gap: 12px; }
+
+        .reminder-item {
+            background: var(--bg-input);
+            border-left: 4px solid var(--brand-accent);
+            padding: 18px;
+            border-radius: 8px 12px 12px 8px;
+            transition: var(--transition);
+        }
+        
+        .reminder-item:hover { 
+            background: rgba(255,255,255,0.06); 
+            transform: translateX(3px); 
+        }
+
+        .reminder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .reminder-title { font-weight: 600; font-size: 1.1rem; color: white; }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Edit and Delete Buttons */
+        .btn-edit, .btn-delete {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-edit:hover {
+            color: var(--brand-edit);
+            transform: scale(1.1);
+        }
+
+        .btn-delete:hover {
+            color: var(--brand-accent);
+            transform: scale(1.1);
+        }
+
+        .reminder-details { font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 15px; flex-wrap: wrap; }
+        .reminder-details i { color: var(--brand-accent); }
+
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 
+            0% { box-shadow: 0 0 0 0 var(--brand-glow); } 
+            70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } 
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+
+    <header class="header">
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <span class="page-title">Smart Reminders 🔔</span>
+    </header>
+
+    <div class="card">
+        <h3><i class="fa-solid fa-plus"></i> <span id="form-title">Create New Reminder</span></h3>
+        
+        <div class="input-group">
+            <label>Reminder Title</label>
+            <input type="text" id="title" placeholder="e.g., Drink Water, Take Meds">
+        </div>
+
+        <div class="input-group">
+            <label>Date</label>
+            <input type="date" id="date">
+        </div>
+
+        <div class="input-group">
+            <label>Time</label>
+            <input type="time" id="time">
+        </div>
+
+        <div class="input-group">
+            <label>Repeat Pattern</label>
+            <select id="repeat">
+                <option value="once">One Time</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+
+        <button id="saveBtn" class="btn-primary" onclick="addOrUpdateReminder()"><i class="fa-solid fa-check"></i> Save Reminder</button>
+    </div>
+
+    <div class="card">
+        <h3><i class="fa-solid fa-list-ul"></i> Your Active Reminders</h3>
+        <div id="reminderList">
+            </div>
+
+        <button id="stopBtn" onclick="stopAlarm()">
+            <i class="fa-solid fa-bell-slash"></i> Stop Alarm
+        </button>
+    </div>
+
+</main>
+
+<audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
+
+<script>
+    let reminders = [];
+    let editingId = null; 
+
+    // Request Notification Permissions on load
+    document.addEventListener('DOMContentLoaded', async () => {
+        if(Notification.permission !== "granted"){
+            Notification.requestPermission();
+        }
+        await loadReminders();
+    });
+
+    function parseReminderContent(rawContent) {
+        try {
+            return JSON.parse(rawContent || '{}');
+        } catch (error) {
+            return { time: '', repeat: 'once', triggered: false };
+        }
+    }
+
+    async function loadReminders() {
+        try {
+            const response = await fetch('/api/items/remainder');
+            if (!response.ok) throw new Error('Unable to load reminders');
+            const items = await response.json();
+            reminders = items.map(item => {
+                const details = parseReminderContent(item.content);
+                return {
+                    id: item.id,
+                    title: item.title,
+                    date: item.date,
+                    time: details.time || '',
+                    repeat: details.repeat || 'once',
+                    triggered: Boolean(details.triggered)
+                };
+            });
+        } catch (error) {
+            reminders = [];
+        }
+        renderReminders();
+    }
+
+    async function saveReminderToServer(reminder) {
+        const payload = {
+            type: 'remainder',
+            title: reminder.title,
+            content: JSON.stringify({
+                time: reminder.time,
+                repeat: reminder.repeat,
+                triggered: reminder.triggered
+            }),
+            date: reminder.date,
+            days: []
+        };
+
+        const response = await fetch(reminder.id ? `/api/items/${reminder.id}` : '/api/items', {
+            method: reminder.id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error('Unable to save reminder');
+        return response.json();
+    }
+
+    async function addOrUpdateReminder(){
+        let title = document.getElementById("title").value;
+        let date = document.getElementById("date").value;
+        let time = document.getElementById("time").value;
+        let repeat = document.getElementById("repeat").value;
+
+        if(!title || !date || !time) {
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        const reminder = {
+            id: editingId,
+            title,
+            date,
+            time,
+            repeat,
+            triggered: false
+        };
+
+        try {
+            await saveReminderToServer(reminder);
+        } catch (error) {
+            alert('Could not save reminder. Please try again.');
+            return;
+        }
+
+        if (editingId) {
+            editingId = null;
+            document.getElementById("form-title").innerText = "Create New Reminder";
+            document.getElementById("saveBtn").innerHTML = '<i class="fa-solid fa-check"></i> Save Reminder';
+            document.getElementById("saveBtn").style.background = "var(--brand-accent)";
+            document.getElementById("saveBtn").style.boxShadow = "0 8px 25px var(--brand-glow)";
+        }
+        
+        // Clear inputs after adding/updating
+        document.getElementById("title").value = '';
+        document.getElementById("date").value = '';
+        document.getElementById("time").value = '';
+        document.getElementById("repeat").value = 'once';
+        
+        await loadReminders();
+    }
+
+    function editReminder(id) {
+        let r = reminders.find(reminder => reminder.id == id);
+        if (!r) return;
+        
+        // Fill the inputs with the existing data
+        document.getElementById("title").value = r.title;
+        document.getElementById("date").value = r.date;
+        document.getElementById("time").value = r.time;
+        document.getElementById("repeat").value = r.repeat;
+
+        // Set the app to "Edit Mode"
+        editingId = r.id;
+        
+        // Update the UI to show we are editing
+        document.getElementById("form-title").innerText = "Edit Reminder";
+        document.getElementById("saveBtn").innerHTML = '<i class="fa-solid fa-pen"></i> Update Reminder';
+        document.getElementById("saveBtn").style.background = "var(--brand-edit)"; // Make button blue
+        document.getElementById("saveBtn").style.boxShadow = "0 8px 25px rgba(59, 130, 246, 0.35)";
+
+        // Smoothly scroll the screen back to the top form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderReminders(){
+        let list = document.getElementById("reminderList");
+        list.innerHTML = "";
+
+        if (reminders.length === 0) {
+            list.innerHTML = "<p style='color: var(--text-secondary); font-size: 0.9rem;'>No active reminders. Add one above!</p>";
+            return;
+        }
+
+        reminders.forEach((r) => {
+            list.innerHTML += `
+            <div class="reminder-item">
+                <div class="reminder-header">
+                    <div class="reminder-title">${r.title}</div>
+                    <div class="reminder-actions">
+                        <button class="btn-edit" onclick="editReminder('${r.id}')" title="Edit Reminder">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteReminder('${r.id}')" title="Delete Reminder">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="reminder-details">
+                    <span><i class="fa-regular fa-calendar"></i> ${r.date}</span>
+                    <span><i class="fa-regular fa-clock"></i> ${r.time}</span>
+                    <span><i class="fa-solid fa-rotate"></i> ${r.repeat}</span>
+                </div>
+            </div>
+            `;
+        });
+    }
+
+    async function deleteReminder(id) {
+        await fetch(`/api/items/${id}`, { method: 'DELETE' });
+        await loadReminders();
+    }
+
+    async function checkReminders(){
+        let now = new Date();
+        let uiNeedsUpdate = false;
+
+        for (const r of reminders) {
+            let reminderTime = new Date(r.date + "T" + r.time);
+
+            if(now >= reminderTime && !r.triggered){
+                
+                if (Notification.permission === "granted") {
+                    new Notification("Health Reminder 🔔", { body: r.title });
+                } else {
+                    alert(`🔔 Health Reminder: ${r.title}`);
+                }
+
+                let alarm = document.getElementById("alarmSound");
+                alarm.volume = 1.0;
+                alarm.currentTime = 0;
+                alarm.play();
+
+                document.getElementById("stopBtn").style.display = "flex";
+                r.triggered = true;
+
+                if(r.repeat !== "once") {
+                    let nextDate = new Date(reminderTime);
+                    
+                    if(r.repeat === "daily") nextDate.setDate(nextDate.getDate() + 1);
+                    if(r.repeat === "weekly") nextDate.setDate(nextDate.getDate() + 7);
+                    if(r.repeat === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
+                    if(r.repeat === "yearly") nextDate.setFullYear(nextDate.getFullYear() + 1);
+
+                    let yyyy = nextDate.getFullYear();
+                    let mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+                    let dd = String(nextDate.getDate()).padStart(2, '0');
+                    
+                    r.date = `${yyyy}-${mm}-${dd}`;
+                    r.triggered = false; 
+                    uiNeedsUpdate = true; 
+                }
+                try {
+                    await saveReminderToServer(r);
+                } catch (error) {
+                    console.error('Could not update reminder state', error);
+                }
+            }
+        }
+
+        if(uiNeedsUpdate) { renderReminders(); }
+    }
+
+    function stopAlarm(){
+        let alarm = document.getElementById("alarmSound");
+        alarm.pause();
+        alarm.currentTime = 0;
+        document.getElementById("stopBtn").style.display = "none";
+    }
+
+    setInterval(checkReminders, 1000);
+
+</script>
+<script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+
+</body>
+</html>

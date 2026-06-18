@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Spark - My Notes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #0f1115;
+            --bg-card: #181b21;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --brand-primary: #a855f7; /* Purple */
+            --brand-glow: rgba(168, 85, 247, 0.4);
+            --border-radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+        body.light-mode .header-bar,
+        body.light-mode .note-card,
+        body.light-mode .note-footer { border-color: rgba(0,0,0,0.1); background-color: #ffffff; }
+        body.light-mode .note-card { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        body.light-mode .btn-back { color: var(--text-secondary); border-color: rgba(0,0,0,0.1); }
+        body.light-mode .note-info-popup {
+            background: rgba(255, 255, 255, 0.98);
+            color: var(--text-primary);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-card);
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .btn-add {
+            background: var(--brand-primary);
+            color: white;
+            box-shadow: 0 4px 15px var(--brand-glow);
+        }
+        .btn-add:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--brand-primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .note-card.private {
+            border-style: dashed;
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .note-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .note-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex-grow: 1;
+            white-space: pre-wrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-footer {
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+            background-color: var(--bg-card);
+        }
+
+        .note-tags {
+            font-size: 0.8rem;
+            color: var(--brand-primary);
+            background: rgba(168, 85, 247, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .btn-delete {
+            background: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+        .btn-delete:hover { transform: scale(1.2); }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+
+        /* Hover Popup */
+        .note-info-popup {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(24, 27, 33, 0.98);
+            padding: 24px;
+            padding-bottom: 80px; /* Space for footer */
+            border-radius: var(--border-radius);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .note-card:hover .note-info-popup {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header class="header-bar">
+            <a href="index.html" class="btn btn-back"><i class="fa-solid fa-chevron-left"></i> Dashboard</a>
+            <h1 class="header-title">My Notes</h1>
+            <a href="notes.html" class="btn btn-add"><i class="fa-solid fa-plus"></i> New Note</a>
+        </header>
+
+        <div id="notes-container" class="notes-grid">
+            <!-- Notes will be injected here -->
+        </div>
+
+        <!-- Password Modal -->
+        <div id="password-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+            <div style="background:var(--bg-card); padding:24px; border-radius:16px; width:90%; max-width:320px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <h3 style="margin-bottom:16px; color:var(--text-primary);">Unlock Private Note</h3>
+                <input type="password" id="modal-password-input" placeholder="Enter Password" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:var(--bg-body); color:var(--text-primary); margin-bottom:20px; font-family:inherit; outline:none;">
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button onclick="closePasswordModal()" style="padding:10px 20px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); cursor:pointer; font-weight:600;">Cancel</button>
+                    <button onclick="checkPassword()" style="padding:10px 20px; border-radius:8px; background:var(--brand-primary); border:none; color:white; cursor:pointer; font-weight:600;">Unlock</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        let pendingNoteId = null;
+
+        function openPasswordModal(id) {
+            pendingNoteId = id;
+            document.getElementById('password-modal').style.display = 'flex';
+            const input = document.getElementById('modal-password-input');
+            input.value = '';
+            input.focus();
+            
+            // Add Enter key listener
+            input.onkeypress = function(e) {
+                if(e.key === 'Enter') checkPassword();
+            };
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').style.display = 'none';
+            pendingNoteId = null;
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('modal-password-input').value.trim();
+            const systemPass = localStorage.getItem('streakSpark_userPassword');
+            if (input === systemPass) {
+                unlockNoteCard(pendingNoteId);
+                closePasswordModal();
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNotes();
+        });
+
+        function unlockNoteCard(id) {
+            const card = document.querySelector(`.note-card[data-id="${id}"]`);
+            if (!card) return;
+
+            const note = window.loadedNotes.find(n => n.id == id);
+            if (!note) return;
+
+            // 1. Remove private styling
+            card.classList.remove('private');
+
+            // 2. Reveal Content in Card Preview
+            const contentEl = card.querySelector('.note-content');
+            if (contentEl) contentEl.innerHTML = note.content;
+
+            // 3. Update Popup Content (so hovering shows details)
+            const popup = card.querySelector('.note-info-popup');
+            if (popup) {
+                popup.innerHTML = `
+                    <h3 class="note-title" style="color:var(--brand-primary); margin-bottom:10px;">${note.title}</h3>
+                    <p style="white-space: pre-wrap; color: var(--text-secondary); line-height: 1.6;">${note.content}</p>
+                `;
+            }
+
+            // 4. Hide Private Badge
+            const badge = card.querySelector('.private-badge');
+            if (badge) badge.style.display = 'none';
+
+            // 5. Add Listener to Re-Lock on Mouse Leave
+            // Using { once: true } ensures it only fires the first time the mouse leaves
+            card.addEventListener('mouseleave', () => {
+                renderNotes(); // Re-render to restore locked state
+            }, { once: true });
+        }
+
+        function parseNoteContent(rawContent) {
+            try {
+                return JSON.parse(rawContent || '{}');
+            } catch (error) {
+                return { body: rawContent || '', tags: '', visibility: 'private' };
+            }
+        }
+
+        async function renderNotes() {
+            const container = document.getElementById('notes-container');
+            let notes = [];
+
+            try {
+                const response = await fetch('/api/items/note');
+                if (!response.ok) throw new Error('Unable to load notes');
+                notes = await response.json();
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-regular fa-note-sticky" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>Could not load notes. Please sign in again.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notes = notes.map(note => {
+                const details = parseNoteContent(note.content);
+                return {
+                    ...note,
+                    content: details.body || '',
+                    tags: details.tags || '',
+                    visibility: details.visibility || 'private'
+                };
+            });
+            window.loadedNotes = notes;
+
+            container.innerHTML = '';
+
+            if (notes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-regular fa-note-sticky" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p>No notes found. Create one to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notes.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+
+            notes.forEach(note => {
+                const dateStr = note.date ? new Date(note.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date';
+                const tagsHtml = note.tags ? `<span class="note-tags">${note.tags}</span>` : '<span></span>';
+                const isPrivate = note.visibility === 'private';
+                
+                // Handle private content display
+                const contentPreview = isPrivate 
+                    ? '<span style="filter: blur(4px); user-select: none; opacity: 0.7;">Hidden Content Private Note</span> <i class="fa-solid fa-lock" style="margin-left:5px;"></i>' 
+                    : note.content;
+                
+                const popupContent = isPrivate
+                    ? '<p style="color: var(--text-secondary); font-style: italic;"><i class="fa-solid fa-lock"></i> This note is private. Click to unlock.</p>'
+                    : `<p style="white-space: pre-wrap; color: var(--text-secondary); line-height: 1.6;">${note.content}</p>`;
+                
+                const card = document.createElement('div');
+                card.className = `note-card ${isPrivate ? 'private' : ''}`;
+                card.setAttribute('data-id', note.id);
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="note-date">${dateStr}</span>
+                        ${isPrivate ? '<span class="private-badge" style="font-size:0.75rem; color:var(--brand-primary); border:1px solid var(--brand-primary); padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-lock"></i> Private</span>' : ''}
+                    </div>
+                    <h3 class="note-title">${note.title}</h3>
+                    <p class="note-content">${contentPreview}</p>
+                    <div class="note-info-popup">
+                        <h3 class="note-title" style="color:var(--brand-primary); margin-bottom:10px;">${note.title}</h3>
+                        ${popupContent}
+                    </div>
+                    <div class="note-footer">
+                        ${tagsHtml}
+                        <button class="btn-delete" onclick="deleteNote('${note.id}')" title="Delete Note">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Make card clickable to edit (except delete button)
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('.btn-delete')) {
+                        if (card.classList.contains('private')) {
+                            openPasswordModal(note.id); // Open modal if locked
+                        } else {
+                            window.location.href = `notes.html?id=${note.id}`;
+                        }
+                    }
+                });
+                card.style.cursor = 'pointer';
+
+                container.appendChild(card);
+            });
+        }
+
+        async function deleteNote(id) {
+            if(confirm('Are you sure you want to delete this note?')) {
+                await fetch(`/api/items/${id}`, { method: 'DELETE' });
+                renderNotes();
+            }
+        }
+    </script>
+    <script
+  src="https://app.livechatai.com/embed.js"
+  data-id="cmnoukseh001xju0490bm4il6"
+  async defer>
+</script>
+</body>
+</html>
